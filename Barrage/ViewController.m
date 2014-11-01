@@ -26,66 +26,6 @@ static const NSInteger kAnimationDuration = 6;
 
 @implementation ViewController
 
-- (IBAction)sendBarrage:(id)sender {
-    
-    int randY = arc4random() % 6 + 0;
-    __block FBGlowLabel *_testLabel = [[FBGlowLabel alloc]initWithFrame:CGRectZero];
-    [_testLabel setText:_contentTextField.text];
-    [_testLabel setTextColor:[UIColor whiteColor]];
-    [_testLabel setTextAlignment:NSTextAlignmentLeft];
-    [_testLabel setBackgroundColor:[UIColor clearColor]];
-    [_testLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:16.0]];
-    _testLabel.clipsToBounds = YES;
-    _testLabel.glowSize = 3;
-    _testLabel.glowColor = [UIColor redColor];
-    
-    CGSize textSize = [_testLabel.text boundingRectWithSize:_testLabel.frame.size options:NSStringDrawingUsesFontLeading attributes:@{NSFontAttributeName : _testLabel.font} context:nil].size;
-    
-    [_testLabel setFrame:CGRectMake(_testImage.frame.size.width,  30 * randY  + 15, textSize.width, textSize.height)];
-    
-    [_testImage addSubview:_testLabel];
-    
-    float offset = _testLabel.frame.size.width + _testImage.frame.size.width;
-    [UIView animateWithDuration:kAnimationDuration
-                          delay:0
-                        options:UIViewAnimationOptionCurveLinear //动画的时间曲线，滚动字幕线性比较合理
-                     animations:^{
-                         _testLabel.transform = CGAffineTransformMakeTranslation(-offset, 0);
-                     }
-                     completion:^(BOOL finished) {
-                         [_testLabel removeFromSuperview];
-                         _testLabel = nil;
-                         NSLog(@"%ld",[[_testImage subviews] count]);
-                     }
-     ];
-    
-    [_contentArray addObject:_contentTextField.text];
-
-}
-
--(void)showBarrageButtonDidClicked:(UIButton*)sender
-{
-    if ([[sender titleForState:UIControlStateNormal] hasPrefix:@"不显示"]) {
-        
-        [_timer invalidate];
-        [sender setTitle:@"显示" forState:UIControlStateNormal];
-        if ([_testImage subviews]) {
-            for (__strong UIView *ob  in [_testImage subviews]) {
-                [ob setHidden:YES];
-            }
-        }
-    }else{
-        
-         _timer = [NSTimer scheduledTimerWithTimeInterval:5.0 target:self selector:@selector(configuration:) userInfo:nil repeats:YES];
-        [sender setTitle:@"不显示" forState:UIControlStateNormal];
-        if ([_testImage subviews]) {
-            for (__strong UIView *ob  in [_testImage subviews]) {
-                [ob setHidden:NO];
-            }
-        }
-    }
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -101,10 +41,14 @@ static const NSInteger kAnimationDuration = 6;
                       @"互联网新人王",
                       @"富二三四代",];
     _contentArray = [NSMutableArray arrayWithArray:defaultArray];
-    
-    [self startAnimation];
-    
 }
+
+-(void)viewDidAppear:(BOOL)animated
+{
+    [self countDown:3];
+    [self startAnimation];
+}
+
 
 -(void)startAnimation{
    _timer = [NSTimer scheduledTimerWithTimeInterval:5.0 target:self selector:@selector(configuration:) userInfo:nil repeats:YES];
@@ -155,4 +99,119 @@ static const NSInteger kAnimationDuration = 6;
                      }
      ];
 }
+
+#pragma mark - Button Action
+- (IBAction)sendBarrage:(id)sender {
+    
+    int randY = arc4random() % 6 + 0;
+    __block FBGlowLabel *_testLabel = [[FBGlowLabel alloc]initWithFrame:CGRectZero];
+    [_testLabel setText:_contentTextField.text];
+    [_testLabel setTextColor:[UIColor whiteColor]];
+    [_testLabel setTextAlignment:NSTextAlignmentLeft];
+    [_testLabel setBackgroundColor:[UIColor clearColor]];
+    [_testLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:16.0]];
+    _testLabel.clipsToBounds = YES;
+    _testLabel.glowSize = 3;
+    _testLabel.glowColor = [UIColor redColor];
+    
+    CGSize textSize = [_testLabel.text boundingRectWithSize:_testLabel.frame.size options:NSStringDrawingUsesFontLeading attributes:@{NSFontAttributeName : _testLabel.font} context:nil].size;
+    
+    [_testLabel setFrame:CGRectMake(_testImage.frame.size.width,  30 * randY  + 15, textSize.width, textSize.height)];
+    
+    [_testImage addSubview:_testLabel];
+    
+    float offset = _testLabel.frame.size.width + _testImage.frame.size.width;
+    [UIView animateWithDuration:kAnimationDuration
+                          delay:0
+                        options:UIViewAnimationOptionCurveLinear //动画的时间曲线，滚动字幕线性比较合理
+                     animations:^{
+                         _testLabel.transform = CGAffineTransformMakeTranslation(-offset, 0);
+                     }
+                     completion:^(BOOL finished) {
+                         [_testLabel removeFromSuperview];
+                         _testLabel = nil;
+                         NSLog(@"%ld",[[_testImage subviews] count]);
+                     }
+     ];
+    
+    [_contentArray addObject:_contentTextField.text];
+    
+}
+
+-(void)showBarrageButtonDidClicked:(UIButton*)sender
+{
+    if ([[sender titleForState:UIControlStateNormal] hasPrefix:@"不显示"]) {
+        
+        [_timer invalidate];
+        [sender setTitle:@"显示" forState:UIControlStateNormal];
+        if ([_testImage subviews]) {
+            for (__strong UIView *ob  in [_testImage subviews]) {
+                [ob setHidden:YES];
+                [ob removeFromSuperview];
+            }
+        }
+    }else{
+        
+        [self countDown:3];
+        [self startAnimation];
+        [sender setTitle:@"不显示" forState:UIControlStateNormal];
+        if ([_testImage subviews]) {
+            for (__strong UIView *ob  in [_testImage subviews]) {
+                [ob setHidden:NO];
+            }
+        }
+    }
+}
+
+#pragma  mark - CountDown
+-(void)countDown:(int)count{
+    
+    if(count <=0){
+        
+        return;
+        
+    }
+    
+    UILabel* lblCountDown = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
+    
+    [lblCountDown setCenter:CGPointMake(CGRectGetWidth(_testImage.frame)/2, CGRectGetHeight(_testImage.frame)/2)];
+    
+    lblCountDown.textColor = [UIColor whiteColor];
+    
+    lblCountDown.font = [UIFont boldSystemFontOfSize:66];
+    
+    lblCountDown.backgroundColor = [UIColor clearColor];
+    
+    lblCountDown.text = [NSString stringWithFormat:@"%d",count];
+    
+    [_testImage addSubview:lblCountDown];
+    
+    [UIView animateWithDuration:1
+     
+                          delay:0
+     
+                        options:UIViewAnimationOptionCurveEaseIn
+     
+                     animations:^{
+                         
+                         lblCountDown.alpha = 0;
+                         
+                         lblCountDown.transform = CGAffineTransformScale(CGAffineTransformIdentity, 0.5, 0.5);
+                         
+                     }
+     
+                     completion:^(BOOL finished) {
+                         
+                         [lblCountDown removeFromSuperview];
+                         
+                         //递归调用，直到计时为零
+                         
+                         [self countDown:count -1];
+                         
+                     }
+     
+     ];
+    
+}
+
 @end
